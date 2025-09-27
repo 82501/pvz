@@ -261,7 +261,7 @@
             <div class="formula-info">
                 <h3>📊 得分计算公式</h3>
                 <ul>
-                    <li><strong>第1-4关：</strong> 得分 = (最高分/任务加成 - 通关时间 × 37.5) × 任务加成</li>
+                    <li><strong>第1-4关：</strong> 得分 = (最高分/1.12 - 通关时间 × 37.5) × 任务加成</li>
                     <li><strong>第5关：</strong> 得分 = 36000 - 30 × 通关时间</li>
                 </ul>
                 <p style="margin-top: 15px; color: #666;">
@@ -334,7 +334,7 @@
         function calculateFinalScore(time, task1, task2, level, pepper) {
             let baseScore = 0;
             let timePenalty = 0;
-            let taskMultiplier = 1;
+            let taskBonus = 1;
             let difficultyMultiplier = 1;
             
             // 根据关卡类型设置基础参数
@@ -355,20 +355,21 @@
             }
             
             // 计算任务加成
-            let taskBonus = 1;
             if (level === '1-4') {
                 if (task1 && task2) {
-                    taskBonus = 1.12;
+                    taskBonus = 1.12;  // 完成2个任务
                 } else if (task1 || task2) {
-                    taskBonus = 1.05;
+                    taskBonus = 1.05;  // 完成1个任务
+                } else {
+                    taskBonus = 1.0;   // 无任务完成
                 }
             }
             
             // 计算最终得分
             let score;
             if (level === '1-4') {
-                // 第1-4关正确公式：(最高分/任务加成 - 通关时间 × 37.5) × 任务加成
-                score = (baseScore / taskBonus - time * timePenalty) * taskBonus;
+                // 第1-4关正确公式：(最高分/1.12 - 通关时间 × 37.5) × 任务加成
+                score = (baseScore / 1.12 - time * timePenalty) * taskBonus;
             } else {
                 // 第5关固定公式：36000 - 30 * 通关时间
                 score = baseScore - time * timePenalty;
@@ -402,7 +403,7 @@
             if (result.isSpecialFormula) {
                 details += `最高分：${result.baseScore.toLocaleString()}<br>`;
                 details += `时间扣分：${time} × 37.5 = ${result.timePenalty.toLocaleString()}<br>`;
-                details += `基础计算：(${result.baseScore.toLocaleString()} ÷ ${result.taskBonus} - ${result.timePenalty.toLocaleString()}) = ${Math.round((result.baseScore / result.taskBonus - result.timePenalty)).toLocaleString()}<br>`;
+                details += `基础计算：(${result.baseScore.toLocaleString()} ÷ 1.12 - ${result.timePenalty.toLocaleString()}) = ${Math.round((result.baseScore / 1.12 - result.timePenalty)).toLocaleString()}<br>`;
             } else {
                 details += `最高分：${result.baseScore.toLocaleString()}<br>`;
                 details += `时间扣分：${time} × 30 = ${result.timePenalty.toLocaleString()}<br>`;

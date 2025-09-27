@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物大战僵尸2 - 追击模式得分计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4CAF50;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #4CAF50;
+        }
+
+        .result-score {
+            font-size: 36px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-details {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .formula-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .formula-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .formula-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .formula-info li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .formula-info li:before {
+            content: "🌱";
+            position: absolute;
+            left: 0;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .checkbox-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 植物大战僵尸2</h1>
+            <p>追击模式得分计算器</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="scoreForm">
+                <div class="form-group">
+                    <label for="time">通关时间（秒）</label>
+                    <input type="number" id="time" name="time" min="0" step="1" placeholder="请输入通关时间" required>
+                    <div class="error-message" id="timeError">请输入有效的通关时间</div>
+                </div>
+
+                <div class="form-group">
+                    <label>任务完成情况</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="task1" name="task1" checked>
+                            <label for="task1">任务1完成</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="task2" name="task2" checked>
+                            <label for="task2">任务2完成</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">关卡类型</label>
+                    <select id="level" name="level" required>
+                        <option value="1-4" selected>第1-4关（普通关卡）</option>
+                        <option value="5">第5关</option>
+                    </select>
+                    <div class="error-message" id="levelError">请选择关卡类型</div>
+                </div>
+
+                <div class="form-group" id="pepperGroup">
+                    <label for="pepper">辣椒难度</label>
+                    <select id="pepper" name="pepper" required>
+                        <option value="3" selected>3辣椒</option>
+                    </select>
+                    <div class="error-message" id="pepperError">请选择辣椒难度</div>
+                </div>
+
+                <button type="button" class="calculate-btn" onclick="calculateScore()">
+                    🧮 计算得分
+                </button>
+            </form>
+
+            <div class="result-container" id="resultContainer" style="display: none;">
+                <div class="result-score" id="resultScore">0</div>
+                <div class="result-details" id="resultDetails"></div>
+            </div>
+
+            <div class="formula-info">
+                <h3>📊 得分计算公式</h3>
+                <ul>
+                    <li><strong>第1-4关：</strong> 得分 = (最高分/任务加成 - 通关时间 × 37.5) × 任务加成</li>
+                    <li><strong>第5关：</strong> 得分 = 36000 - 30 × 通关时间</li>
+                </ul>
+                <p style="margin-top: 15px; color: #666;">
+                    <strong>第1-4关最高分：</strong> 1辣椒(12600) | 2辣椒(15120) | 3辣椒(17640)<br>
+                    <strong>第5关最高分：</strong> 36000分<br>
+                    <strong>任务加成：</strong> 无任务(1.0) | 1个任务(1.05) | 2个任务(1.12)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateScore() {
+            // 清除之前的错误信息
+            clearErrors();
+            
+            // 获取输入值
+            const time = parseInt(document.getElementById('time').value);
+            const task1 = document.getElementById('task1').checked;
+            const task2 = document.getElementById('task2').checked;
+            const level = document.getElementById('level').value;
+            const pepper = document.getElementById('pepper').value;
+            
+            // 验证输入
+            if (!validateInput(time, level, pepper)) {
+                return;
+            }
+            
+            // 计算得分
+            const result = calculateFinalScore(time, task1, task2, level, pepper);
+            
+            // 显示结果
+            displayResult(result, time, task1, task2, level, pepper);
+        }
+        
+        function validateInput(time, level, pepper) {
+            let isValid = true;
+            
+            if (isNaN(time) || time < 0) {
+                showError('timeError', '请输入有效的通关时间');
+                isValid = false;
+            }
+            
+            if (!level) {
+                showError('levelError', '请选择关卡类型');
+                isValid = false;
+            }
+            
+            if (!pepper) {
+                showError('pepperError', '请选择辣椒难度');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function showError(errorId, message) {
+            const errorElement = document.getElementById(errorId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+            });
+        }
+        
+        function calculateFinalScore(time, task1, task2, level, pepper) {
+            let baseScore = 0;
+            let timePenalty = 0;
+            let taskMultiplier = 1;
+            let difficultyMultiplier = 1;
+            
+            // 根据关卡类型设置基础参数
+            switch(level) {
+                case '1-4':
+                    // 第1-4关使用特殊公式：（最高分/任务加成-通关时间*37.5）*任务加成
+                    timePenalty = 37.5;
+                    // 只有3辣椒选项
+                    baseScore = 17640; // 3辣椒最高分
+                    difficultyMultiplier = 1.4;
+                    break;
+                case '5':
+                    // 第5关固定公式：36000 - 30 * 通关时间
+                    baseScore = 36000;
+                    timePenalty = 30;
+                    difficultyMultiplier = 1.0;
+                    break;
+            }
+            
+            // 计算任务加成
+            let taskBonus = 1;
+            if (level === '1-4') {
+                if (task1 && task2) {
+                    taskBonus = 1.12;
+                } else if (task1 || task2) {
+                    taskBonus = 1.05;
+                }
+            }
+            
+            // 计算最终得分
+            let score;
+            if (level === '1-4') {
+                // 第1-4关正确公式：(最高分/任务加成 - 通关时间 × 37.5) × 任务加成
+                score = (baseScore / taskBonus - time * timePenalty) * taskBonus;
+            } else {
+                // 第5关固定公式：36000 - 30 * 通关时间
+                score = baseScore - time * timePenalty;
+            }
+            score = Math.max(score, 0); // 确保得分不为负数
+            
+            return {
+                finalScore: Math.round(score),
+                baseScore: baseScore,
+                timePenalty: time * timePenalty,
+                taskBonus: taskBonus,
+                difficultyMultiplier: difficultyMultiplier,
+                level: level,
+                pepper: pepper,
+                isSpecialFormula: level === '1-4'
+            };
+        }
+        
+        function displayResult(result, time, task1, task2, level, pepper) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultScore = document.getElementById('resultScore');
+            const resultDetails = document.getElementById('resultDetails');
+            
+            // 显示最终得分
+            resultScore.textContent = result.finalScore.toLocaleString();
+            
+            // 生成详细信息
+            let details = `关卡类型：${getLevelName(level)}<br>`;
+            details += `辣椒难度：${pepper}辣椒<br>`;
+            details += `通关时间：${time}秒<br>`;
+            if (result.isSpecialFormula) {
+                details += `最高分：${result.baseScore.toLocaleString()}<br>`;
+                details += `时间扣分：${time} × 37.5 = ${result.timePenalty.toLocaleString()}<br>`;
+                details += `基础计算：(${result.baseScore.toLocaleString()} ÷ ${result.taskBonus} - ${result.timePenalty.toLocaleString()}) = ${Math.round((result.baseScore / result.taskBonus - result.timePenalty)).toLocaleString()}<br>`;
+            } else {
+                details += `最高分：${result.baseScore.toLocaleString()}<br>`;
+                details += `时间扣分：${time} × 30 = ${result.timePenalty.toLocaleString()}<br>`;
+                details += `最终得分：${result.baseScore.toLocaleString()} - ${result.timePenalty.toLocaleString()} = ${result.finalScore.toLocaleString()}<br>`;
+            }
+            
+            if (result.taskBonus > 1) {
+                details += `任务加成：×${result.taskBonus}<br>`;
+            }
+            
+            if (result.difficultyMultiplier > 1) {
+                details += `难度加成：×${result.difficultyMultiplier}<br>`;
+            }
+            
+            details += `任务完成：${getTaskStatus(task1, task2)}`;
+            
+            resultDetails.innerHTML = details;
+            resultContainer.style.display = 'block';
+            
+            // 滚动到结果区域
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function getLevelName(level) {
+            const levelNames = {
+                '1-4': '第1-4关（普通关卡）',
+                '5': '第5关'
+            };
+            return levelNames[level] || level;
+        }
+        
+        function getTaskStatus(task1, task2) {
+            if (task1 && task2) return '任务1✓ 任务2✓';
+            if (task1) return '任务1✓ 任务2✗';
+            if (task2) return '任务1✗ 任务2✓';
+            return '任务1✗ 任务2✗';
+        }
+        
+        // 添加回车键支持
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateScore();
+            }
+        });
+        
+        // 实时验证输入
+        document.getElementById('time').addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (value < 0) {
+                this.value = 0;
+            }
+        });
+
+        // 页面加载时自动计算一次得分（使用默认值）
+        window.addEventListener('load', function() {
+            // 可以在这里添加自动计算逻辑，如果需要的话
+        });
+    </script>
+</body>
+</html>
